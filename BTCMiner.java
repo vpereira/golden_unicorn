@@ -603,7 +603,7 @@ class BTCMinerCluster {
     		}
     	    }
 	    catch ( Exception e ) {
-		BTCMiner.printMsg( "Error: "+e.getLocalizedMessage() );
+		BTCMiner.printMsg( "Error1: "+e.getLocalizedMessage() );
 	    }
 	}
 
@@ -1681,12 +1681,13 @@ class BTCMiner implements MsgObj  {
     }
 
 // ******* sendData ***********************************************************
+//  for litecoin send 80 bytes of the 128 byte data plus 4 bytes of 32 byte target
     public void sendData () throws UsbException {
-	for ( int i=0; i<12; i++ ) 
-	    sendBuf[i] = dataBuf[i+64];
-	//for ( int i=0; i<32; i++ ) 
-	//    sendBuf[i+12] = midstateBuf[i];
-	    
+	for ( int i=0; i < 80; i++)
+	    sendBuf[i] = dataBuf[i]; 
+	for ( int i=0; i < 4; i++ ) 
+	    sendBuf[i+80] = targetBuf[i];
+    
 	long t = new Date().getTime();
 	synchronized (ztex) {
 	    try {
@@ -2434,7 +2435,7 @@ class BTCMiner implements MsgObj  {
 	    
 	}
 	catch (Exception e) {
-	    System.out.println("Error: "+e.getLocalizedMessage() );
+	    System.out.println("Error:2 "+e.getLocalizedMessage() );
 	} 
 
 	if ( BTCMiner.newBlockMonitor != null ) {
