@@ -117,3 +117,54 @@
 2013-09-20T23:56:04: ztex_ufm1_15b1-04A39E20AD-1: f=184.00MHz,  errorRate=0.00%,  maxErrorRate=0.00%,  hashRate=92.0MH/s,  submitted 0 new nonces,  luckFactor=1.12
 2013-09-20T23:56:19: ztex_ufm1_15b1-04A39E20AD-1: f=184.00MHz,  errorRate=0.00%,  maxErrorRate=0.00%,  hashRate=92.0MH/s,  submitted 0 new nonces,  luckFactor=1.11
 2013-09-20T23:56:34: ztex_ufm1_15b1-04A39E20AD-1: f=184.00MHz,  errorRate=0.00%,  maxErrorRate=0.00%,  hashRate=92.0MH/s,  submitted 0 new nonces,  luckFactor=1.09
+2013-09-24T14:51:38: ztex_ufm1_15b1-04A39E20AD: New device: bitfile=ztex_ufm1_15b1   f_default=184.00MHz  f_max=224.00MHz  HpC=0.5H
+2013-09-24T14:51:38: ztex_ufm1_15b1-04A39E20AD: MAC address: 0004a39e20ad
+2013-09-24T14:51:39: ztex_ufm1_15b1-04A39E20AD: FPGA 1: configuration time: 291 ms
+2013-09-24T14:51:39: ztex_ufm1_15b1-04A39E20AD-1: New FPGA
+2013-09-24T14:51:39: ztex_ufm1_15b1-04A39E20AD-1: Set frequency to 184.00MHz
+2013-09-24T14:51:40: ztex_ufm1_15b1-04A39E20AD-1: Using LongPolling URL http://pool-d.khore.org:80/LP
+2013-09-24T14:51:41: ztex_ufm1_15b1-04A39E20AD-1: Set frequency from 184.00MHz to 176.00MHz
+2013-09-24T14:51:44: ztex_ufm1_15b1-04A39E20AD-1: Set frequency from 176.00MHz to 184.00MHz
+2013-09-24T14:51:46: ztex_ufm1_15b1-04A39E20AD-1: Set frequency from 184.00MHz to 176.00MHz
+2013-09-24T14:51:49: ztex_ufm1_15b1-04A39E20AD-1: Set frequency from 176.00MHz to 168.00MHz
+2013-09-24T14:51:49: ztex_ufm1_15b1-04A39E20AD-1: Error: Hash rate drop of 8.7% detect. This may be caused by overheating. FPGA is shut down to prevent damage.: Disabling device
+2013-09-24T14:52:47: ztex_ufm1_15b1-04A39E20AD: New device: bitfile=ztex_ufm1_15b1   f_default=184.00MHz  f_max=224.00MHz  HpC=0.5H
+2013-09-24T14:52:47: ztex_ufm1_15b1-04A39E20AD: MAC address: 0004a39e20ad
+2013-09-24T14:52:48: ztex_ufm1_15b1-04A39E20AD: FPGA 1: configuration time: 294 ms
+2013-09-24T14:52:48: ztex_ufm1_15b1-04A39E20AD-1: New FPGA
+2013-09-24T14:52:48: ztex_ufm1_15b1-04A39E20AD-1: Set frequency to 184.00MHz
+2013-09-24T14:55:18: ztex_ufm1_15b1-04A39E20AD: New device: bitfile=ztex_ufm1_15b1   f_default=184.00MHz  f_max=224.00MHz  HpC=0.5H
+2013-09-24T14:55:18: ztex_ufm1_15b1-04A39E20AD: MAC address: 0004a39e20ad
+2013-09-24T14:55:19: ztex_ufm1_15b1-04A39E20AD: FPGA 1: configuration time: 294 ms
+2013-09-24T14:55:19: ztex_ufm1_15b1-04A39E20AD-1: New FPGA
+2013-09-24T14:55:19: ztex_ufm1_15b1-04A39E20AD-1: Set frequency to 184.00MHz
+2013-09-24T14:56:53: ztex_ufm1_15b1-04A39E20AD: New device: bitfile=ztex_ufm1_15b1   f_default=184.00MHz  f_max=224.00MHz  HpC=0.5H
+2013-09-24T14:56:53: ztex_ufm1_15b1-04A39E20AD: MAC address: 0004a39e20ad
+2013-09-24T14:56:54: ztex_ufm1_15b1-04A39E20AD: FPGA 1: configuration time: 295 ms
+2013-09-24T14:56:54: ztex_ufm1_15b1-04A39E20AD-1: New FPGA
+2013-09-24T14:56:54: ztex_ufm1_15b1-04A39E20AD-1: Set frequency to 184.00MHz
+2013-09-24T14:57:28: ztex_ufm1_15b1-04A39E20AD: New device: bitfile=ztex_ufm1_15b1   f_default=184.00MHz  f_max=224.00MHz  HpC=0.5H
+2013-09-24T14:57:28: ztex_ufm1_15b1-04A39E20AD: MAC address: 0004a39e20ad
+2013-09-24T14:57:29: ztex_ufm1_15b1-04A39E20AD: FPGA 1: configuration time: 297 ms
+2013-09-24T14:57:29: ztex_ufm1_15b1-04A39E20AD-1: New FPGA
+2013-09-24T14:57:29: ztex_ufm1_15b1-04A39E20AD-1: Set frequency to 184.00MHz
+2013-09-24T14:59:09: ztex_ufm1_15b1-04A39E20AD: New device: bitfile=ztex_ufm1_15b1   f_default=184.00MHz  f_max=224.00MHz  HpC=0.5H
+2013-09-24T14:59:09: ztex_ufm1_15b1-04A39E20AD: MAC address: 0004a39e20ad
+2013-09-24T14:59:10: ztex_ufm1_15b1-04A39E20AD: FPGA 1: configuration time: 291 ms
+2013-09-24T14:59:10: ztex_ufm1_15b1-04A39E20AD-1: New FPGA
+2013-09-24T14:59:10: ztex_ufm1_15b1-04A39E20AD-1: Set frequency to 184.00MHz
+2013-09-24T14:59:11: ztex_ufm1_15b1-04A39E20AD-1: Using LongPolling URL http://pool-d.khore.org:80/LP
+2013-09-24T14:59:12: ztex_ufm1_15b1-04A39E20AD-1: Set frequency from 184.00MHz to 176.00MHz
+2013-09-24T14:59:15: ztex_ufm1_15b1-04A39E20AD-1: Set frequency from 176.00MHz to 184.00MHz
+2013-09-24T14:59:17: ztex_ufm1_15b1-04A39E20AD-1: Set frequency from 184.00MHz to 176.00MHz
+2013-09-24T14:59:20: ztex_ufm1_15b1-04A39E20AD-1: Set frequency from 176.00MHz to 168.00MHz
+2013-09-24T14:59:20: ztex_ufm1_15b1-04A39E20AD-1: Error: Hash rate drop of 8.7% detect. This may be caused by overheating. FPGA is shut down to prevent damage.: Disabling device
+2013-09-24T15:02:36: ztex_ufm1_15b1-04A39E20AD: New device: bitfile=ztex_ufm1_15b1   f_default=184.00MHz  f_max=224.00MHz  HpC=0.5H
+2013-09-24T15:02:36: ztex_ufm1_15b1-04A39E20AD: MAC address: 0004a39e20ad
+2013-09-24T15:02:37: ztex_ufm1_15b1-04A39E20AD: FPGA 1: configuration time: 292 ms
+2013-09-24T15:02:37: ztex_ufm1_15b1-04A39E20AD-1: New FPGA
+2013-09-24T15:02:37: ztex_ufm1_15b1-04A39E20AD-1: Set frequency to 184.00MHz
+2013-09-24T15:02:40: ztex_ufm1_15b1-04A39E20AD-1: Using LongPolling URL http://pool-d.khore.org:80/LP
+2013-09-24T15:02:40: ztex_ufm1_15b1-04A39E20AD-1: Got new work
+2013-09-24T15:02:42: ztex_ufm1_15b1-04A39E20AD-1: Set frequency from 184.00MHz to 176.00MHz
+2013-09-24T15:02:44: ztex_ufm1_15b1-04A39E20AD-1: Set frequency from 176.00MHz to 184.00MHz

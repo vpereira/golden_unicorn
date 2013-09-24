@@ -1,4 +1,4 @@
-DIRS=bmp examples java libusbJava-src
+DIRS=bmp java libusbJava-src
 
 .PHONY: default all clean distclean avr avrclean avrdistclean
 
@@ -8,7 +8,6 @@ default:
 
 all:
 	make -C java all
-	make -C examples all
 
 docs:
 	make -C docs all
@@ -19,11 +18,4 @@ clean:
 distclean:
 	set -e; for i in $(DIRS); do make -C $$i distclean; done
 
-avr: 
-	make -C examples avr
 
-avrclean: 
-	make -C examples avrclean
-
-avrdistclean: 
-	make -C examples avrdistclean
