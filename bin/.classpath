@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry excluding="ztex/examples/usb-xmega-1.0/nvmtest/|ztex/examples/usb-fpga-1.2/intraffic/|ztex/examples/usb-fpga-1.15/1.15a/memtest/|ztex/examples/usb-xmega-1.0/flashdemo/|ztex/examples/usb-fpga-1.15/1.15a/ucecho/|ztex/examples/usb-fpga-1.15/1.15a/lightshow/|ztex/examples/usb-1.0/flashdemo/|ztex/examples/usb-fpga-1.15y/intraffic/|ztex/libusbJava-src/|ztex/examples/usb-fpga-1.11/1.11c/intraffic/|ztex/examples/usb-fpga-1.15/nvmtest/|ztex/examples/usb-xmega-1.0/ucecho/|ztex/examples/usb-fpga-1.11/1.11b/ucecho/|ztex/examples/usb-fpga-1.15/1.15b/intraffic/|ztex/examples/usb-fpga-1.15/1.15d/mmio/|ztex/examples/usb-fpga-1.11/1.11c/memtest/|ztex/examples/usb-fpga-1.11/1.11c/ucecho/|ztex/examples/usb-xmega-1.0/flashbench/|ztex/examples/usb-fpga-1.15/1.15d/memtest/|ztex/examples/usb-fpga-1.11/1.11b/memtest/|ztex/examples/usb-fpga-1.15/1.15b/ucecho/|ztex/examples/usb-fpga-1.11/1.11c/lightshow/|ztex/examples/usb-1.0/flashbench/|ztex/examples/usb-fpga-1.15/1.15b/memtest/|ztex/examples/usb-fpga-1.11/nvmtest/|ztex/examples/usb-fpga-1.15/1.15d/ucecho/|ztex/examples/usb-fpga-1.11/1.11a/memtest/|ztex/examples/usb-fpga-1.15/1.15d/lightshow/|ztex/examples/usb-fpga-1.11/1.11a/intraffic/|ztex/examples/usb-fpga-1.11/1.11a/lightshow/|ztex/java/|ztex/examples/usb-fpga-1.2/lightshow/|ztex/examples/all/debug/|ztex/examples/usb-fpga-1.2/flashbench/|ztex/examples/usb-fpga-1.11/flashdemo/|ztex/examples/usb-fpga-1.15/1.15d/intraffic/|ztex/examples/usb-fpga-1.2/ucecho/|ztex/examples/usb-fpga-1.15/1.15a/mmio/|ztex/examples/usb-fpga-1.2/flashdemo/|ztex/examples/usb-fpga-1.15/1.15a/intraffic/|ztex/examples/usb-fpga-1.11/1.11a/ucecho/|ztex/examples/usb-fpga-1.11/1.11b/intraffic/|ztex/examples/all/ucecho/|ztex/java/DeviceServer/|ztex/java/FWLoader/|ztex/examples/usb-fpga-1.15y/ucecho/|ztex/examples/usb-fpga-1.2/nvmtest/|ztex/examples/usb-fpga-1.15/1.15b/lightshow/|ztex/examples/usb-fpga-1.11/1.11b/lightshow/|ztex/examples/usb-fpga-1.15/flashbench/|ztex/examples/usb-fpga-1.11/flashbench/|ztex/examples/usb-fpga-1.15/flashdemo/|ztex/examples/usb-fpga-1.15/1.15b/mmio/|ztex/" kind="src" path=""/>
+	<classpathentry excluding="examples/usb-xmega-1.0/nvmtest/|examples/usb-fpga-1.2/intraffic/|examples/usb-fpga-1.15/1.15a/memtest/|examples/usb-xmega-1.0/flashdemo/|examples/usb-fpga-1.15/1.15a/ucecho/|examples/usb-fpga-1.15/1.15a/lightshow/|examples/usb-1.0/flashdemo/|examples/usb-fpga-1.15y/intraffic/|libusbJava-src/|examples/usb-fpga-1.11/1.11c/intraffic/|examples/usb-fpga-1.15/nvmtest/|examples/usb-xmega-1.0/ucecho/|examples/usb-fpga-1.11/1.11b/ucecho/|examples/usb-fpga-1.15/1.15b/intraffic/|examples/usb-fpga-1.15/1.15d/mmio/|examples/usb-fpga-1.11/1.11c/memtest/|examples/usb-fpga-1.11/1.11c/ucecho/|examples/usb-xmega-1.0/flashbench/|examples/usb-fpga-1.15/1.15d/memtest/|examples/usb-fpga-1.11/1.11b/memtest/|examples/usb-fpga-1.15/1.15b/ucecho/|examples/usb-fpga-1.11/1.11c/lightshow/|examples/usb-1.0/flashbench/|examples/usb-fpga-1.15/1.15b/memtest/|examples/usb-fpga-1.11/nvmtest/|examples/usb-fpga-1.15/1.15d/ucecho/|examples/usb-fpga-1.11/1.11a/memtest/|examples/usb-fpga-1.15/1.15d/lightshow/|examples/usb-fpga-1.11/1.11a/intraffic/|examples/usb-fpga-1.11/1.11a/lightshow/|java/|examples/usb-fpga-1.2/lightshow/|examples/all/debug/|examples/usb-fpga-1.2/flashbench/|examples/usb-fpga-1.11/flashdemo/|examples/usb-fpga-1.15/1.15d/intraffic/|examples/usb-fpga-1.2/ucecho/|examples/usb-fpga-1.15/1.15a/mmio/|examples/usb-fpga-1.2/flashdemo/|examples/usb-fpga-1.15/1.15a/intraffic/|examples/usb-fpga-1.11/1.11a/ucecho/|examples/usb-fpga-1.11/1.11b/intraffic/|examples/all/ucecho/|java/DeviceServer/|java/FWLoader/|examples/usb-fpga-1.15y/ucecho/|examples/usb-fpga-1.2/nvmtest/|examples/usb-fpga-1.15/1.15b/lightshow/|examples/usb-fpga-1.11/1.11b/lightshow/|examples/usb-fpga-1.15/flashbench/|examples/usb-fpga-1.11/flashbench/|examples/usb-fpga-1.15/flashdemo/|examples/usb-fpga-1.15/1.15b/mmio/" kind="src" path="ztex"/>
+	<classpathentry kind="src" path="ztex/examples/all/debug"/>
+	<classpathentry kind="src" path="ztex/examples/all/ucecho"/>
+	<classpathentry kind="src" path="ztex/examples/usb-1.0/flashbench"/>
+	<classpathentry kind="src" path="ztex/examples/usb-1.0/flashdemo"/>
+	<classpathentry kind="src" path="ztex/examples/usb-fpga-1.11/1.11a/intraffic"/>
+	<classpathentry kind="src" path="ztex/examples/usb-fpga-1.11/1.11a/lightshow"/>
+	<classpathentry kind="src" path="ztex/examples/usb-fpga-1.11/1.11a/memtest"/>
+	<classpathentry kind="src" path="ztex/examples/usb-fpga-1.11/1.11a/ucecho"/>
+	<classpathentry kind="src" path="ztex/examples/usb-fpga-1.11/1.11b/intraffic"/>
+	<classpathentry kind="src" path="ztex/examples/usb-fpga-1.11/1.11b/lightshow"/>
+	<classpathentry kind="src" path="ztex/examples/usb-fpga-1.11/1.11b/memtest"/>
+	<classpathentry kind="src" path="ztex/examples/usb-fpga-1.11/1.11b/ucecho"/>
+	<classpathentry kind="src" path="ztex/examples/usb-fpga-1.11/1.11c/intraffic"/>
+	<classpathentry kind="src" path="ztex/examples/usb-fpga-1.11/1.11c/lightshow"/>
+	<classpathentry kind="src" path="ztex/examples/usb-fpga-1.11/1.11c/memtest"/>
+	<classpathentry kind="src" path="ztex/examples/usb-fpga-1.11/1.11c/ucecho"/>
+	<classpathentry kind="src" path="ztex/examples/usb-fpga-1.11/flashbench"/>
+	<classpathentry kind="src" path="ztex/examples/usb-fpga-1.11/flashdemo"/>
+	<classpathentry kind="src" path="ztex/examples/usb-fpga-1.11/nvmtest"/>
+	<classpathentry kind="src" path="ztex/examples/usb-fpga-1.15/1.15a/intraffic"/>
+	<classpathentry kind="src" path="ztex/examples/usb-fpga-1.15/1.15a/lightshow"/>
+	<classpathentry kind="src" path="ztex/examples/usb-fpga-1.15/1.15a/memtest"/>
+	<classpathentry kind="src" path="ztex/examples/usb-fpga-1.15/1.15a/mmio"/>
+	<classpathentry kind="src" path="ztex/examples/usb-fpga-1.15/1.15a/ucecho"/>
+	<classpathentry kind="src" path="ztex/examples/usb-fpga-1.15/1.15b/intraffic"/>
+	<classpathentry kind="src" path="ztex/examples/usb-fpga-1.15/1.15b/lightshow"/>
+	<classpathentry kind="src" path="ztex/examples/usb-fpga-1.15/1.15b/memtest"/>
+	<classpathentry kind="src" path="ztex/examples/usb-fpga-1.15/1.15b/mmio"/>
+	<classpathentry kind="src" path="ztex/examples/usb-fpga-1.15/1.15b/ucecho"/>
+	<classpathentry kind="src" path="ztex/examples/usb-fpga-1.15/1.15d/intraffic"/>
+	<classpathentry kind="src" path="ztex/examples/usb-fpga-1.15/1.15d/lightshow"/>
+	<classpathentry kind="src" path="ztex/examples/usb-fpga-1.15/1.15d/memtest"/>
+	<classpathentry kind="src" path="ztex/examples/usb-fpga-1.15/1.15d/mmio"/>
+	<classpathentry kind="src" path="ztex/examples/usb-fpga-1.15/1.15d/ucecho"/>
+	<classpathentry kind="src" path="ztex/examples/usb-fpga-1.15/flashbench"/>
+	<classpathentry kind="src" path="ztex/examples/usb-fpga-1.15/flashdemo"/>
+	<classpathentry kind="src" path="ztex/examples/usb-fpga-1.15/nvmtest"/>
+	<classpathentry kind="src" path="ztex/examples/usb-fpga-1.15y/intraffic"/>
+	<classpathentry kind="src" path="ztex/examples/usb-fpga-1.15y/ucecho"/>
+	<classpathentry kind="src" path="ztex/examples/usb-fpga-1.2/flashbench"/>
+	<classpathentry kind="src" path="ztex/examples/usb-fpga-1.2/flashdemo"/>
+	<classpathentry kind="src" path="ztex/examples/usb-fpga-1.2/intraffic"/>
+	<classpathentry kind="src" path="ztex/examples/usb-fpga-1.2/lightshow"/>
+	<classpathentry kind="src" path="ztex/examples/usb-fpga-1.2/nvmtest"/>
+	<classpathentry kind="src" path="ztex/examples/usb-fpga-1.2/ucecho"/>
+	<classpathentry kind="src" path="ztex/examples/usb-xmega-1.0/flashbench"/>
+	<classpathentry kind="src" path="ztex/examples/usb-xmega-1.0/flashdemo"/>
+	<classpathentry kind="src" path="ztex/examples/usb-xmega-1.0/nvmtest"/>
+	<classpathentry kind="src" path="ztex/examples/usb-xmega-1.0/ucecho"/>
+	<classpathentry excluding="DeviceServer/|FWLoader/" kind="src" path="ztex/java"/>
+	<classpathentry kind="src" path="ztex/java/DeviceServer"/>
+	<classpathentry kind="src" path="ztex/java/FWLoader"/>
+	<classpathentry kind="src" path="ztex/libusbJava-src"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry kind="output" path="bin"/>
+</classpath>

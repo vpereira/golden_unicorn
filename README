@@ -1,0 +1,19 @@
+ztex miner and framework
+
+to build it you will need:
+
+read http://wiki.ztex.de/doku.php?id=en:software:porting#macos_port
+java sdk, sdcc, make, freepascal, etc
+
+
+
+build order
+
+cd ztex/libusbJava-src/ && make && make install2 (if you are on mac make -f Makefile.macosx)
+
+cd ztex && make distall
+
+root directory: make (I normally copy the result from libusbJava-src to the root directory). I had to rename it to libusbJava64.dylib. I'm sure that is all customizable but I dont have time to do it.
+
+
+ 
