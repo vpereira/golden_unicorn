@@ -395,6 +395,19 @@ class LTCMiner implements MsgObj  {
 	"ztex_ufm1_15y1.ihx" 
     };
     
+
+//invert endian in chunk
+public static byte[] chunkEndianSwitch(byte[] bytes) {
+           //Method to properly switch the endianness of the header -- numbers must be treated as 32 bit chunks. Thanks to ali1234 for this.
+           byte[] bytes2 = new byte[bytes.length];
+           for(int i = 0; i < bytes.length;  i+=4){
+                   bytes2[i] = bytes[i+3];
+                   bytes2[i+1] = bytes[i+2];
+                   bytes2[i+2] = bytes[i+1];
+                   bytes2[i+3] = bytes[i];
+           }
+           return bytes2;
+ }
     
 // ******* printMsg *************************************************************
     public static void printMsg ( String msg ) {
@@ -664,7 +677,7 @@ class LTCMiner implements MsgObj  {
     private byte[] dataBuf2 = new byte[128];
     private byte[] sendBuf = new byte[84]; 
     private byte[] hashBuf = hexStrToData("00000000000000000000000000000000000000000000000000000000000000000000008000000000000000000000000000000000000000000000000000010000");
-    private byte[] targetBuf = hexStrToData("ffffffffffffffffffffffffffffffffffffffffffffffffffffffff00000000");
+    private byte[] targetBuf = chunkEndianSwitch(hexStrToData("ffffffffffffffffffffffffffffffffffffffffffffffffffffffffff7f0000"));
     
     private int newCount = 0;
 
@@ -908,6 +921,7 @@ class LTCMiner implements MsgObj  {
 	}
     }
 
+
 // ******* dmsg *****************************************************************
     void dmsg(String s) {
 	if ( verbose )
@@ -1027,11 +1041,11 @@ class LTCMiner implements MsgObj  {
 		hexStrToData(jsonParse(response,"target"), targetBuf);
 	    }
 	    else {
-		hexStrToData("ffffffffffffffffffffffffffffffffffffffffffffffffffffffff00000000", targetBuf);
+		hexStrToData("ffffffffffffffffffffffffffffffffffffffffffffffffffffffffff7f0000", targetBuf);
 	    }
 	}
 	catch ( Exception e ) {
-	    hexStrToData("ffffffffffffffffffffffffffffffffffffffffffffffffffffffff00000000", targetBuf);	
+	    hexStrToData("ffffffffffffffffffffffffffffffffffffffffffffffffffffffffff7f0000", targetBuf);	
 	}
 	
 	
@@ -1070,9 +1084,9 @@ class LTCMiner implements MsgObj  {
 
 // ******* initWork **********************************************************
     public void initWork (byte[] data) {
-	if ( data.length != 84 )
+	if ( data.length != 80 )
 	    throw new NumberFormatException("Invalid length of data " + data.length);
-	for (int i=0; i<84; i++)
+	for (int i=0; i<80; i++)
 	    dataBuf[i] = data[i];
     }
 // ******* compareWithTarget ***************************************************
@@ -1098,11 +1112,11 @@ class LTCMiner implements MsgObj  {
 // ******* sendData ***********************************************************
 //  for litecoin send 80 bytes of the 128 byte data plus 4 bytes of 32 byte target
     public void sendData () throws UsbException {
-	for ( int i=0; i < 80; i++)
-	    sendBuf[i] = dataBuf[i]; 
 	for ( int i=0; i < 4; i++ ) 
-	    sendBuf[i+80] = targetBuf[i];
-    
+	    sendBuf[i] = targetBuf[i];
+	for ( int i=0; i < 80; i++)
+	    sendBuf[i+4] = dataBuf[i]; 
+
 	long t = new Date().getTime();
 	synchronized (ztex) {
 	    try {
@@ -1565,7 +1579,7 @@ class LTCMiner implements MsgObj  {
 		if ( mode == 't' ) { // single mode
 		//here lets add the scrypt test data from here:
 		    miner.initWork( 
-			hexStrToData( "000000014eb4577c82473a069ca0e95703254da62e94d1902ab6f0eae8b1e718565775af20c9ba6ced48fc9915ef01c54da2200090801b2d2afc406264d491c7dfc7b0b251e91f141b44717e00310000ff070000" )
+			chunkEndianSwitch(hexStrToData( "01000000f615f7ce3b4fc6b8f61e8f89aedb1d0852507650533a9e3b10b9bbcc30639f279fcaa86746e1ef52d3edb3c4ad8259920d509bd073605c9bf1d59983752a6b06b817bb4ea78e011d012d59d4" ))
 		    );
 
 		    miner.sendData ( );
