@@ -395,6 +395,14 @@ class LTCMiner implements MsgObj  {
 	"ztex_ufm1_15y1.ihx" 
     };
     
+public static byte[] endianSwitch(byte[] bytes) {
+		//Method to switch the endianess of a byte array
+	   byte[] bytes2 = new byte[bytes.length];
+	   for(int i = 0; i < bytes.length;  i++){
+		   bytes2[i] = bytes[bytes.length-i-1];
+	   }
+	   return bytes2;
+}
 
 //invert endian in chunk
 public static byte[] chunkEndianSwitch(byte[] bytes) {
@@ -677,7 +685,7 @@ public static byte[] chunkEndianSwitch(byte[] bytes) {
     private byte[] dataBuf2 = new byte[128];
     private byte[] sendBuf = new byte[84]; 
     private byte[] hashBuf = hexStrToData("00000000000000000000000000000000000000000000000000000000000000000000008000000000000000000000000000000000000000000000000000010000");
-    private byte[] targetBuf = chunkEndianSwitch(hexStrToData("ffffffffffffffffffffffffffffffffffffffffffffffffffffffffff7f0000"));
+    private byte[] targetBuf = endianSwitch(hexStrToData("ffffffffffffffffffffffffffffffffffffffffffffffffffffffffff7f0000"));
     
     private int newCount = 0;
 
