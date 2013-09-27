@@ -1380,7 +1380,7 @@ public static byte[] chunkEndianSwitch(byte[] bytes) {
 	double hr = (freqM+1)*freqM1*(1-errorRate[freqM])*hashesPerClock;
 
 	if ( errorWeight[freqM]>20 )
-	    sb.append(",  hashRate=" + String.format("%.1f", hr )+"MH/s" );
+	    sb.append(",  hashRate=" + String.format("%.1f", hr )+"KH/s" );
 	    
 	try { 
 	    sb.append(", T=" + String.format("%.1f",ztex.tempSensorRead(fpgaNum)) + "C");
