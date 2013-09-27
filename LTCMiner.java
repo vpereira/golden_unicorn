@@ -1050,6 +1050,7 @@ public static byte[] chunkEndianSwitch(byte[] bytes) {
  	
 	try {
 	    hexStrToData(jsonParse(response,"data"), dataBuf);
+	    dataBuf = chunkEndianSwitch(dataBuf);
 	}
 	catch ( NumberFormatException e ) {
 	    throw new ParserException( e.getLocalizedMessage() );
@@ -1069,6 +1070,7 @@ public static byte[] chunkEndianSwitch(byte[] bytes) {
 	    hexStrToData("ffffffffffffffffffffffffffffffffffffffffffffffffffffffffff7f0000", targetBuf);	
 	}
 	
+	targetBuf = endianSwitch(targetBuf);
 	
 	lastGetWorkTime = new Date().getTime();
 	prevRpcNum = i;
@@ -1116,7 +1118,7 @@ public static byte[] chunkEndianSwitch(byte[] bytes) {
   	  //intToData(nonce, dataBuf, 76);
       try {
     	  Hasher hasher = new Hasher();
-    	  byte[] hash = hasher.hash(dataBuf, nonce);
+    	  byte[] hash = hasher.hash(chunkEndianSwitch(dataBuf), nonce);
     	  for (int i = hash.length - 1; i >= 0; i--) {
     		if ((hash[i] & 0xff) > (targetBuf[i] & 0xff))
     			return false;
@@ -1139,6 +1141,7 @@ public static byte[] chunkEndianSwitch(byte[] bytes) {
 	    sendBuf[i+4] = dataBuf[i]; 
 
 	System.out.println("DATA TO BE SENT: " + prettyPrintByteArray(sendBuf));
+
 	long t = new Date().getTime();
 	synchronized (ztex) {
 	    try {
@@ -1290,8 +1293,10 @@ public static byte[] chunkEndianSwitch(byte[] bytes) {
 	boolean submitted = false;
         for ( int i=0; i<numNonces*(1+extraSolutions); i++ ) {
     	    int n = goldenNonce[i];
+	    System.out.println("goldenNonce = " + n);
     	    if ( n != -offsNonces ) {
     		if ( compareWithTarget(n) ) {
+		    System.out.println("uhu");
     		    int j=0;
     		    while ( j<lastGoldenNonces.length && lastGoldenNonces[j]!=n )
     			j++;
@@ -1324,7 +1329,7 @@ public static byte[] chunkEndianSwitch(byte[] bytes) {
     	}
         usbTime += new Date().getTime() - t;
         
-	System.out.print("rd:" + dataToHexStr(endianSwitch(buf))+":"+buf.length + "  ");
+	//System.out.print("rd:" + dataToHexStr(endianSwitch(buf))+":"+buf.length + "  ");
         for ( int i=0; i<numNonces; i++ ) {
 	    goldenNonce[i*(1+extraSolutions)] = dataToInt(buf,i*bs+0) - offsNonces;
 	    int j = dataToInt(buf,i*bs+4) - offsNonces;
