@@ -40,7 +40,7 @@ ENABLE_HS_FPGA_CONF(2);
 
 
 // this product string is also used for identification by the host software
-#define[PRODUCT_STRING]["btcminer for ZTEX FPGA Modules"]
+#define[PRODUCT_STRING]["ltcminer for ZTEX FPGA Modules"]
 
 #define[WATCHDOG_TIMEOUT][(300*100)]
 

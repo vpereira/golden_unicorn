@@ -6,9 +6,9 @@
 ZTEXPREFIX=./ztex
 
 # The name of the jar archive
-JARTARGET=ZtexBTCMiner.jar
+JARTARGET=ZtexLTCMiner.jar
 # Java Classes that have to be build 
-CLASSTARGETS=BTCMiner.class
+CLASSTARGETS=LTCMiner.class
 # Extra dependencies for Java Classes
 CLASSEXTRADEPS=Hasher.class
 

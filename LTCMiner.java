@@ -173,6 +173,7 @@ class LTCMinerThread extends Thread {
 	    pollLoop.printInfo( busName );
     }
 
+
 // ******* disconnect ***********************************************************
     public int disconnect ( String ss, Vector<LTCMiner> allMiners ) {
 	int i=0;
@@ -394,9 +395,21 @@ class LTCMiner implements MsgObj  {
 	"ztex_ufm1_15d4.ihx" ,
 	"ztex_ufm1_15y1.ihx" 
     };
-    
+// ******* prettyPrint *********************************************************
+public static String prettyPrintByteArray(byte[] bites){
+        //Method to convert a byte array to hex literal separated by bites.
+        String str = "";
+        int n = 0;
+        for(byte bite:bites){
+                n += 1;
+                str = str + (Integer.toString( ( bite & 0xff ) + 0x100, 16 /* radix */ ).substring( 1 ));
+        }
+        return str;
+ }
+
+   
 public static byte[] endianSwitch(byte[] bytes) {
-		//Method to switch the endianess of a byte array
+	   //Method to switch the endianess of a byte array
 	   byte[] bytes2 = new byte[bytes.length];
 	   for(int i = 0; i < bytes.length;  i++){
 		   bytes2[i] = bytes[bytes.length-i-1];
@@ -1125,6 +1138,7 @@ public static byte[] chunkEndianSwitch(byte[] bytes) {
 	for ( int i=0; i < 80; i++)
 	    sendBuf[i+4] = dataBuf[i]; 
 
+	System.out.println("DATA TO BE SENT: " + prettyPrintByteArray(sendBuf));
 	long t = new Date().getTime();
 	synchronized (ztex) {
 	    try {
@@ -1310,7 +1324,7 @@ public static byte[] chunkEndianSwitch(byte[] bytes) {
     	}
         usbTime += new Date().getTime() - t;
         
-	System.out.print("rd:" + dataToHexStr(buf)+":"+buf.length + "  ");
+	System.out.print("rd:" + dataToHexStr(endianSwitch(buf))+":"+buf.length + "  ");
         for ( int i=0; i<numNonces; i++ ) {
 	    goldenNonce[i*(1+extraSolutions)] = dataToInt(buf,i*bs+0) - offsNonces;
 	    int j = dataToInt(buf,i*bs+4) - offsNonces;
@@ -1569,7 +1583,7 @@ public static byte[] chunkEndianSwitch(byte[] bytes) {
 		}
 	    }
 		
-	    if ( mode == 't' ) {
+	    if ( mode == 's' || mode == 't' ) {
 		if ( devNum < 0 )
 		    devNum = 0;
 	
@@ -1586,12 +1600,11 @@ public static byte[] chunkEndianSwitch(byte[] bytes) {
 	        LTCMiner miner = new LTCMiner ( bus.device(devNum), firmwareFile, verbose );
 		if ( mode == 't' ) { // single mode
 		//here lets add the scrypt test data from here:
-		    miner.initWork( 
-			chunkEndianSwitch(hexStrToData( "01000000f615f7ce3b4fc6b8f61e8f89aedb1d0852507650533a9e3b10b9bbcc30639f279fcaa86746e1ef52d3edb3c4ad8259920d509bd073605c9bf1d59983752a6b06b817bb4ea78e011d012d59d4" ))
-		    );
+		    miner.initWork(chunkEndianSwitch(hexStrToData("000000014eb4577c82473a069ca0e95703254da62e94d1902ab6f0eae8b1e718565775af20c9ba6ced48fc9915ef01c54da2200090801b2d2afc406264d491c7dfc7b0b251e91f141b44717e00310000")));
+			//miner.initWork(hexStrToData("01000000f615f7ce3b4fc6b8f61e8f89aedb1d0852507650533a9e3b10b9bbcc30639f279fcaa86746e1ef52d3edb3c4ad8259920d509bd073605c9bf1d59983752a6b06b817bb4ea78e011d012d59d4" )); //this data is already in little endian
 
 		    miner.sendData ( );
-		    for (int i=0; i<200; i++ ) {
+		    for (int i=0; i<6500; i++ ) {
 			try {
 			    Thread.sleep( 250 );
 			}
