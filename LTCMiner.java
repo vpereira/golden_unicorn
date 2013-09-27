@@ -252,28 +252,28 @@ class PollLoop {
 				else {
 			    	    m.getNonces();
 				}
-				m.updateFreq();
+				//m.updateFreq();
 				m.printInfo(false);
 			    }
 			}
 			catch ( IOException e ) {
 			    m.ioErrorCount[m.rpcNum]++;
 			    if ( m.ioErrorCount[m.rpcNum] >= maxIoErrorCount ) {
-    			        m.msg("Error: "+e.getLocalizedMessage() +": Disabling URL " + m.rpcurl[m.rpcNum] + " for " + ioDisableTime + "s");
+    			        m.msg("Error: "+e.getLocalizedMessage() +": IOException: Disabling URL " + m.rpcurl[m.rpcNum] + " for " + ioDisableTime + "s");
     			        m.disableTime[m.rpcNum] = new Date().getTime() + ioDisableTime*1000;
     			        m.ioErrorCount[m.rpcNum] = 0;
 			    }
     			}
 			catch ( ParserException e ) {
-    			    m.msg("Error: "+e.getLocalizedMessage() +": Disabling URL " + m.rpcurl[m.rpcNum] + " for 60s");
+    			    m.msg("Error: "+e.getLocalizedMessage() +": ParseException: Disabling URL " + m.rpcurl[m.rpcNum] + " for 60s");
     			    m.disableTime[m.rpcNum] = new Date().getTime() + 60000;
     			}
 			catch ( NumberFormatException e ) {
-    			    m.msg("Error: "+e.getLocalizedMessage() +": Disabling URL " + m.rpcurl[m.rpcNum] + " for 60s");
+    			    m.msg("Error: "+e.getLocalizedMessage() +": NumberFormatException Disabling URL " + m.rpcurl[m.rpcNum] + " for 60s");
     			    m.disableTime[m.rpcNum] = new Date().getTime() + 60000;
     			}
 			catch ( IndexOutOfBoundsException e ) {
-    			    m.msg("Error: "+e.getLocalizedMessage() +": Disabling URL " + m.rpcurl[m.rpcNum] + " for 60s");
+    			    m.msg("Error: "+e.getLocalizedMessage() +": IndexOutofBoundException Disabling URL " + m.rpcurl[m.rpcNum] + " for 60s");
     			    m.disableTime[m.rpcNum] = new Date().getTime() + 60000;
     			}
 			catch ( Exception e ) {
@@ -1376,9 +1376,6 @@ public static byte[] chunkEndianSwitch(byte[] bytes) {
 
 	if ( errorWeight[freqM]>100 )
 	    sb.append(",  maxErrorRate="+ String.format("%.2f",maxErrorRate[freqM]*100)+"%");
-
-/*	if ( freqM<255 && (errorWeight[freqM+1]>100.1 || maxErrorRate[freqM+1]>0.001 ) )
-	    sb.append(",  nextMaxErrorRate="+ String.format("%.2f",maxErrorRate[freqM+1]*100)+"%"); */
 
 	double hr = (freqM+1)*freqM1*(1-errorRate[freqM])*hashesPerClock;
 
