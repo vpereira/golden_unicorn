@@ -1301,6 +1301,7 @@ public static byte[] chunkEndianSwitch(byte[] bytes) {
 // ******* sendData ***********************************************************
 //  for litecoin send 80 bytes of the 128 byte data plus 4 bytes of 32 byte target
     public void sendData () throws UsbException {
+	//here we should pass the compact form of target
 	final byte targ[] = new byte[] {0x00,0x00,0x7f,(byte)0xff};
 	for ( int i=0; i < targ.length; i++ ) 
 	    sendBuf[i] = targ[i];
