@@ -220,7 +220,7 @@ class PollLoop {
     private double networkTime = 0.0;
     private double timeW = 1e-6;
     private Vector<LTCMiner> v;
-    public static final long minQueryInterval = 250;
+    public static final long minQueryInterval = 150;
 
 // ******* constructor *********************************************************
     public PollLoop ( Vector<LTCMiner> pv ) {
@@ -338,7 +338,7 @@ class NewBlockMonitor extends Thread implements MsgObj {
     
     public boolean running;
     
-    private static final int minLongPollInterval = 250; // in ms
+    private static final int minLongPollInterval = 150; // in ms
 
     private byte[] prevBlock = new byte[32];
     private byte[] dataBuf = new byte[128];
@@ -361,13 +361,16 @@ class NewBlockMonitor extends Thread implements MsgObj {
 
 	data = LTCMiner.endianSwitch(data);
 
+/*
 	for ( int i=0; i<32; i++ ) {
 	    n = n | ( data[i+4] != prevBlock[i] );
 	    prevBlock[i] = data[i+4];
 	}
+*/
+	n = true;
 	if ( n ) {
 	    newCount += 1;
-	    submitOld = true;
+	    submitOld = false;
 	    if ( newCount > 0 )
 		msg("New block detected by block monitor");
 	}
@@ -429,7 +432,7 @@ class NewBlockMonitor extends Thread implements MsgObj {
 	    }
 	    
 	    if ( LTCMiner.longPollURL==null )
-		enableLPTime = new Date().getTime() + 2000;
+		enableLPTime = new Date().getTime() + 1000;
 	    
 	    t += minLongPollInterval - new Date().getTime();
 	    if ( t > 5 ) {
@@ -513,7 +516,7 @@ class LTCMiner implements MsgObj  {
     
     static double tempLimit = 65;  // in C
     
-    static boolean targetCheck = false;
+    static boolean targetCheck = true; //it should come from the CLI
     
     static String filterSN = null;
 
@@ -545,16 +548,15 @@ public static byte[] endianSwitch(byte[] bytes) {
 }
 
 //invert endian in chunk
-public static byte[] chunkEndianSwitch(byte[] bytes) {
-           //Method to properly switch the endianness of the header -- numbers must be treated as 32 bit chunks. Thanks to ali1234 for this.
-           byte[] bytes2 = new byte[bytes.length];
-           for(int i = 0; i < bytes.length;  i+=4){
-                   bytes2[i] = bytes[i+3];
-                   bytes2[i+1] = bytes[i+2];
-                   bytes2[i+2] = bytes[i+1];
-                   bytes2[i+3] = bytes[i];
-           }
-           return bytes2;
+public static byte[] chunkEndianSwitch(byte[] data) {
+	byte[] h = new byte[80];
+	for (int i = 0; i < 80; i += 4) {
+		h[i]     = data[i + 3];
+		h[i + 1] = data[i + 2];
+		h[i + 2] = data[i + 1];
+		h[i + 3] = data[i];
+	}
+	return h;
  }
     
 // ******* printMsg *************************************************************
@@ -834,7 +836,9 @@ public static byte[] chunkEndianSwitch(byte[] bytes) {
     private byte[] dataBuf2 = new byte[128];
     private byte[] sendBuf = new byte[84]; 
     private byte[] hashBuf = hexStrToData("00000000000000000000000000000000000000000000000000000000000000000000008000000000000000000000000000000000000000000000000000010000");
-    private byte[] targetBuf = hexStrToData("ffffffffffffffffffffffffffffffffffffffffffffffffffffffffff000000");
+    private byte[] targetBuf = hexStrToData("ffffffffffffffffffffffffffffffffffffffffffffffffffffffffff07");
+    //we are using just the first 61 bytes
+    //private byte[] targetBuf = hexStrToData("ffffffffffffffffffffffffffffffffffffffffffffffffffffffffff070000");
     
     private int newCount = 0;
 
@@ -1225,14 +1229,15 @@ public static byte[] chunkEndianSwitch(byte[] bytes) {
 	
 	try {
 	    if ( targetCheck ) {
-		hexStrToData(jsonParse(response,"target"), targetBuf);
+		String str = jsonParse(response,"target");
+		hexStrToData(str.substring(0,60), targetBuf);
 	    }
 	    else {
-		hexStrToData("ffffffffffffffffffffffffffffffffffffffffffffffffffffffffff000000", targetBuf);
+		hexStrToData("ffffffffffffffffffffffffffffffffffffffffffffffffffffffffff07", targetBuf);
 	    }
 	}
 	catch ( Exception e ) {
-	    hexStrToData("ffffffffffffffffffffffffffffffffffffffffffffffffffffffffff000000", targetBuf);	
+	    hexStrToData("ffffffffffffffffffffffffffffffffffffffffffffffffffffffffff07", targetBuf);	
 	}
 	
 	targetBuf = endianSwitch(targetBuf);
@@ -1245,15 +1250,15 @@ public static byte[] chunkEndianSwitch(byte[] bytes) {
 // ******* submitWork **********************************************************
     public void submitWork( int n ) throws MalformedURLException, IOException {
 	long t = new Date().getTime();
-
-	dataBuf2[79] = (byte) (n >>  0);
-	dataBuf2[78] = (byte) (n >>  8);
-	dataBuf2[77] = (byte) (n >> 16);
-	dataBuf2[76] = (byte) (n >> 24);
+	byte[] d = dataBuf2.clone();
+	d[79] = (byte) (n >>  0);
+	d[78] = (byte) (n >>  8);
+	d[77] = (byte) (n >> 16);
+	d[76] = (byte) (n >> 24);
 
 	dmsg( "Submitting new nonce " + intToHexStr(n) + ":" +  n );
-	dmsg( dateFormat.format( new Date() ) + ": " + name + ": submitted " + dataToHexStr(dataBuf2) + " to " + rpcurl[rpcNum]);
-	String response = bitcoinRequest( "getwork", dataToHexStr(dataBuf2));
+	dmsg( dateFormat.format( new Date() ) + ": " + name + ": submitted " + dataToHexStr(d) + " to " + rpcurl[rpcNum]);
+	String response = bitcoinRequest( "getwork", dataToHexStr(d));
 	String err = null;
 	try {
 	    err = jsonParse(response,"error");
@@ -1273,14 +1278,22 @@ public static byte[] chunkEndianSwitch(byte[] bytes) {
     }
 
 // ******* initWork **********************************************************
+// if we are adding a custom target, then data should be 80 bytes
     public void initWork (byte[] data) {
 	if ( data.length != 80 )
 	    throw new NumberFormatException("Invalid length of data " + data.length);
 	for (int i=0; i<80; i++)
 	    dataBuf[i] = data[i];
     }
+
+// ******  targetCompress *****************************************************
+// return the target as the verilog side needs
+// we assume targetBuf as endianSwitch(hexStrToData(targetBuf))
+   public byte[] targetCompress() {
+	   return hexStrToData(dataToHexStr(targetBuf).substring(0,4).toLowerCase());
+   }   
 // ******* compareWithTarget ***************************************************
-    // returns true if smaller than or equal to target
+// returns true if smaller than or equal to target
     public boolean compareWithTarget(int nonce) throws NumberFormatException {
       try {
     	  Hasher hasher = new Hasher();
@@ -1298,16 +1311,25 @@ public static byte[] chunkEndianSwitch(byte[] bytes) {
 	 
     }
 
+    public void sendData () throws UsbException {
+	    sendData(false);
+    }
 // ******* sendData ***********************************************************
 //  for litecoin send 80 bytes of the 128 byte data plus 4 bytes of 32 byte target
-    public void sendData () throws UsbException {
-	//here we should pass the compact form of target
-	final byte targ[] = new byte[] {0x00,0x00,0x7f,(byte)0xff};
-	for ( int i=0; i < targ.length; i++ ) 
-	    sendBuf[i] = targ[i];
-	for ( int i=0; i < 80; i++)
-	    sendBuf[i+4] = dataBuf[i]; 
-
+    public void sendData (boolean testMode) throws UsbException {
+	if(testMode == true) {
+	  final byte target[] = new byte[] {0x00,0x00,0x7f,(byte)0xff};
+	  for ( int i=0; i < 80; i++)
+	    sendBuf[i] = dataBuf[i]; 
+	  for ( int i=0; i < 4; i++)
+	    sendBuf[i+80] = target[i];
+	} else {
+	   //tuned for litecoin
+	   for ( int i=0; i < 80; i++)
+	    sendBuf[i] = dataBuf[i]; 
+	   for (int i = 0; i < 4; i++)
+	    sendBuf[i+80] = targetBuf[i];
+	 }
 	System.out.println("DATA TO FPGA: " + dataToHexStr(sendBuf));
 
 	long t = new Date().getTime();
@@ -1766,11 +1788,12 @@ public static byte[] chunkEndianSwitch(byte[] bytes) {
 		
 	        LTCMiner miner = new LTCMiner ( bus.device(devNum), firmwareFile, verbose );
 		if ( mode == 't' ) { // single mode
+		//miner.initWork(hexStrToData("000000014eb4577c82473a069ca0e95703254da62e94d1902ab6f0eae8b1e718565775af20c9ba6ced48fc9915ef01c54da2200090801b2d2afc406264d491c7dfc7b0b251e91f141b44717e00310000ff070000"));
 		//here lets add the scrypt test data from here:
-		    //miner.initWork(chunkEndianSwitch(hexStrToData("000000014eb4577c82473a069ca0e95703254da62e94d1902ab6f0eae8b1e718565775af20c9ba6ced48fc9915ef01c54da2200090801b2d2afc406264d491c7dfc7b0b251e91f141b44717e00310000")));
+		//
 		miner.initWork(hexStrToData("00001300e71744b141f19e152b0b7cfd7c194d462604cfa2d2b1080900022ad45c10fe5199cf84dec6ab9c02fa577565817e1b8eae0f6ba2091d49e26ad45230759e0ac960a37428c7754be410000000" )); //this data is already in little endian at nonce 0000318f
 
-		    miner.sendData ( );
+		    miner.sendData (true); //true for testmode
 		    for (int i=0; i<Integer.MAX_VALUE; i++ ) {
 			try {
 			    Thread.sleep( 250 );
@@ -1780,7 +1803,7 @@ public static byte[] chunkEndianSwitch(byte[] bytes) {
 			miner.getNoncesInt();
 
     			for ( int j=0; j<miner.numNonces; j++ ) {
-	    		    System.out.println( i  + ":  miner nonce " + intToHexStr(miner.nonce[j]));  
+	    		    System.out.println( i  + ":  miner nonce " + intToHexStr(miner.nonce[j]) + " golden nonce " + intToHexStr(miner.goldenNonce[j])) ;  
 	    		}
 		    } 
 		}
