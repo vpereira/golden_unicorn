@@ -61,7 +61,7 @@ class ParameterException extends Exception {
 		"    -l2 <log file>    Secondary log file, logs everything but statistics \n" +
 		"    -bl <log file>    Log of submitted blocks file \n" +
 		"    -c <file name>    Secondary command input file, can be a named pipe \n" + 
-		"    -m s|t|p|c        Set single mode, test mode, programming mode or cluster mode\n"+
+		"    -m s|p|c        Set single mode, test mode, programming mode or cluster mode\n"+
 		"                      Single mode: runs LTCMiner on a single board (default mode)\n" +
 		"                      Test mode: tests a board using some test data\n" +
 		"                      Programming mode: programs device with the given firmware\n" +
@@ -105,96 +105,6 @@ interface MsgObj {
 }
     
 
-// *****************************************************************************
-// ******* LTCMinerThread ******************************************************
-// *****************************************************************************
-class LTCMinerThread extends Thread {
-    private Vector<LTCMiner> miners = new Vector<LTCMiner>();
-    private String busName;
-    private PollLoop pollLoop = null;
-    
-// ******* constructor *********************************************************
-    public LTCMinerThread( String bn ) {
-	busName = bn;
-    }
-
-// ******* add *****************************************************************
-    public void add ( LTCMiner m ) {
-	synchronized ( miners ) {
-	    miners.add ( m );
-	    m.name = busName + ": " + m.name;
-	}
-
-	if ( pollLoop==null ) {
-	    LTCMiner.printMsg2("Starting mining thread for bus " + busName);
-	    start();
-	}
-    }
-
-// ******* size ****************************************************************
-    public int size () {
-	return miners.size();
-    }
-
-// ******* elementAt ***********************************************************
-    public LTCMiner elementAt ( int i ) {
-	return miners.elementAt(i);
-    }
-
-// ******* find ****************************************************************
-    public LTCMiner find ( int dn ) {
-	for (int i=0; i<miners.size(); i++ ) {
-	    if ( (miners.elementAt(i).ztex().dev().dev().getDevnum() == dn) )
-		return miners.elementAt(i);
-	}
-	return null;
-    }
-
-// ******* busName *************************************************************
-    public String busName () {
-	return busName;
-    }
-
-// ******* running *************************************************************
-    public boolean running () {
-	return pollLoop != null;
-    }
-
-// ******* run *****************************************************************
-    public void run () {
-	pollLoop = new PollLoop(miners);
-	pollLoop.run();
-	pollLoop = null;
-    }
-
-// ******* printInfo ************************************************************
-    public void printInfo ( ) {
-	if ( pollLoop != null )
-	    pollLoop.printInfo( busName );
-    }
-
-
-// ******* disconnect ***********************************************************
-    public int disconnect ( String ss, Vector<LTCMiner> allMiners ) {
-	int i=0;
-	synchronized ( miners ) {
-	    for (int j=miners.size()-1; j>=0; j-- ) {
-		LTCMiner m = miners.elementAt(j);
-		if ( ss.equals(m.ztex().dev().snString()) ) {
-		    LTCMiner.printMsg("Disconnecting "+m.name);
-		    if ( allMiners != null )
-			allMiners.removeElement(m);
-		    m.suspend();
-		    miners.removeElementAt(j);
-		    i+=1;
-		}
-	    }
-	}
-	return i;
-    }
-
-}
-
 
 // *****************************************************************************
 // ******* LogString ***********************************************************
@@ -219,12 +129,11 @@ class PollLoop {
     private double usbTime = 0.0;
     private double networkTime = 0.0;
     private double timeW = 1e-6;
-    private Vector<LTCMiner> v;
     public static final long minQueryInterval = 150;
-
+    LTCMiner m;
 // ******* constructor *********************************************************
-    public PollLoop ( Vector<LTCMiner> pv ) {
-	v = pv;
+    public PollLoop ( LTCMiner miner) {
+	m  = miner;
     }
 	
 // ******* run *****************************************************************
@@ -232,14 +141,14 @@ class PollLoop {
 	int maxIoErrorCount = (int) Math.round( (LTCMiner.rpcCount > 1 ? 2 : 4)*LTCMiner.connectionEffort );
 	int ioDisableTime = LTCMiner.rpcCount > 1 ? 60 : 30;
 	
-	while ( v.size()>0 ) {
+	while ( true ) {
 	    long t0 = new Date().getTime();
 	    long tu = 0;
 
 	    if ( ! scanMode ) {
-		synchronized ( v ) {
-		    for ( int i=v.size()-1; i>=0; i-- ) {
-			LTCMiner m = v.elementAt(i);
+		//synchronized ( v ) {
+		    //for ( int i=v.size()-1; i>=0; i-- ) {
+		//	LTCMiner m = v.elementAt(i);
 			
 			m.usbTime = 0;
 			
@@ -279,12 +188,11 @@ class PollLoop {
 			catch ( Exception e ) {
     			    m.msg("Error: "+e.getLocalizedMessage()+": Disabling device");
     			    m.fatalError = "Error: "+e.getLocalizedMessage()+": Device disabled since " + LTCMiner.dateFormat.format( new Date() );
-    			    v.removeElementAt(i);
 			}
 
     			tu += m.usbTime;
-   		    }
-		}
+   		    //}
+		//}
 
 		t0 = new Date().getTime() - t0;
 		usbTime = usbTime * 0.9998 + tu;
@@ -310,17 +218,14 @@ class PollLoop {
     public void printInfo( String name ) {
 	int oc = 0;
 	double gt=0.0, gtw=0.0, st=0.0, stw=0.0;
-	for ( int i=v.size()-1; i>=0; i-- ) {
-	    LTCMiner m = v.elementAt(i);
-	    oc += m.overflowCount;
-	    m.overflowCount = 0;
+	oc += m.overflowCount;
+	m.overflowCount = 0;
 	    
-	    st += m.submitTime;
-	    stw += m.submitTimeW;
+	st += m.submitTime;
+	stw += m.submitTimeW;
 	    
-	    gt += m.getTime;
-	    gtw += m.getTimeW;
-	}
+	gt += m.getTime;
+	gtw += m.getTimeW;
 	    
 	LTCMiner.printMsg2(name + ": poll loop time: " + Math.round((usbTime+networkTime)/timeW) + "ms (USB: " + Math.round(usbTime/timeW) + "ms network: " + Math.round(networkTime/timeW) + "ms)   getwork time: " 
 		+  Math.round(gt/gtw) + "ms  submit time: " +  Math.round(st/stw) + "ms" );
@@ -360,7 +265,7 @@ class NewBlockMonitor extends Thread implements MsgObj {
 	boolean n = false;
 
 	data = LTCMiner.endianSwitch(data);
-
+//XXX REIMPLEMENT IT
 /*
 	for ( int i=0; i<32; i++ ) {
 	    n = n | ( data[i+4] != prevBlock[i] );
@@ -395,8 +300,8 @@ class NewBlockMonitor extends Thread implements MsgObj {
 		try {
 		    msg("info: LP");
 		    String req = LTCMiner.bitcoinRequest(this, LTCMiner.longPollURL, LTCMiner.longPollUser, LTCMiner.longPollPassw, "getwork", "");
-		    LTCMiner.hexStrToData(LTCMiner.jsonParse(req, "data"), dataBuf);
-		    dataBuf = LTCMiner.endianSwitch(dataBuf);
+		    LTCMiner.hexStringToByteArray(LTCMiner.jsonParse(req, "data"), dataBuf);
+		    //dataBuf = LTCMiner.endianSwitch(dataBuf);
 
 		    submitOld = true;
 		    String so = null;
@@ -547,18 +452,7 @@ public static byte[] endianSwitch(byte[] bytes) {
 	   return bytes2;
 }
 
-//invert endian in chunk
-public static byte[] chunkEndianSwitch(byte[] data) {
-	byte[] h = new byte[data.length];
-	for (int i = 0; i < data.length; i += 4) {
-		h[i]     = data[i + 3];
-		h[i + 1] = data[i + 2];
-		h[i + 2] = data[i + 1];
-		h[i + 3] = data[i];
-	}
-	return h;
- }
-    
+   
 // ******* printMsg *************************************************************
     public static void printMsg ( String msg ) {
 	System.out.println( msg );
@@ -679,15 +573,6 @@ public static byte[] chunkEndianSwitch(byte[] data) {
 	    throw new NumberFormatException("Invalid length of string");
 	for ( int i=0; i<buf.length; i++) {
 	    buf[i] = (byte) Integer.parseInt( str.substring(i*2,i*2+2), 16);
-	}
-    }
-
-// ******* hexStrToData2 ********************************************************
-    public static void hexStrToData2( String str, byte[] buf ) throws NumberFormatException {
-	if ( str.length()<buf.length*2 ) 
-	    throw new NumberFormatException("Invalid length of string");
-	for ( int i=0; i<buf.length; i++) {
-	    buf[i] = (byte) (Integer.parseInt( str.substring(i*2,i*2+1), 16) + Integer.parseInt( str.substring(i*2+1,i*2+2), 16)*16);
 	}
     }
 
@@ -1143,7 +1028,7 @@ public static byte[] chunkEndianSwitch(byte[] data) {
 	con.setRequestProperty("Cache-Control", "no-cache");
         con.setRequestProperty("User-Agent", "ztexLTCMiner");
         con.setRequestProperty("Content-Length", "" + request.length());
-        con.setRequestProperty("X-Mining-Extensions", "longpoll submitold"); //remove midstate scrypt
+        con.setRequestProperty("X-Mining-Extensions", "longpoll midstate"); //remove midstate scrypt
         con.setUseCaches(false);
         con.setDoInput(true);
         con.setDoOutput(true);
@@ -1242,8 +1127,8 @@ public static byte[] chunkEndianSwitch(byte[] data) {
  	
 	try {
 	    hexStringToByteArray(jsonParse(response,"data"), dataBuf);
-	    dmsg("fresh dataBuf " + dataToHexStr(dataBuf));
-	    dataBuf = endianSwitch(dataBuf);
+	    dmsg("fresh dataBuf " + byteArrayToHexString(dataBuf));
+	    //dataBuf=endianSwitch(dataBuf);
 	}
 	catch ( NumberFormatException e ) {
 	    throw new ParserException( e.getLocalizedMessage() );
@@ -1302,18 +1187,6 @@ public static byte[] chunkEndianSwitch(byte[] data) {
 	submitTime = submitTime * 0.99 + t;
 	submitTimeW = submitTimeW * 0.99 + 1;
     }
-
-// ******* initWork **********************************************************
-// JUST USEFUL IF YOU ARE RUNNING IN TEST MODE
-// if we are adding a custom target, then data should be 80 bytes
-// TODO: FIX IT
-    public void initWork (byte[] data) {
-	if ( data.length != 80 )
-	    throw new NumberFormatException("Invalid length of data " + data.length);
-	for (int i=0; i<80; i++)
-	    dataBuf[i] = data[i];
-    }
-
     public void sendData () throws UsbException {
 	    sendData(false);
     }
@@ -1321,25 +1194,17 @@ public static byte[] chunkEndianSwitch(byte[] data) {
 //  for litecoin send 80 bytes of the 128 byte data plus 4 bytes of 32 byte target
 //  IT MUST BE FIXED
     public void sendData (boolean testMode) throws UsbException {
-	if(testMode == true) {
-	  final byte target[] = new byte[] {0x00,0x00,0x7f,(byte)0xff};
-	  for ( int i=0; i < 80; i++)
-	    sendBuf[i] = dataBuf[i]; 
-	  for ( int i=0; i < 4; i++)
-	    sendBuf[i+80] = target[i];
-	} else {
-	   //tuned for litecoin
-	   dmsg("databuf size = " + dataBuf.length);
-	   String dataBufHex = dataToHexStr(dataBuf);
-	   dmsg("little endian dataBuf in hex: " + dataBufHex);
-	   String d1 = dataBufHex.substring(0,(79+1)*2);
-   	   String targetHex = dataToHexStr(targetBuf);
-	   String target = targetHex.substring(0,7+1);
-	   dmsg("sendTarget = " + target);
-	   //sendBuf = hexStrToData(d1 + d2 + d3 + target);
-	   sendBuf = hexStrToData(d1 +  target);
-	 }
-	dmsg("DATA TO FPGA " + dataToHexStr(sendBuf) + ":" + sendBuf.length );
+   	//tuned for litecoin
+        dmsg("databuf size = " + dataBuf.length);
+	byte[] dataToSend = new byte[80];
+	for(int i = 0; i < 80; i++)
+		dataToSend[i] = dataBuf[i];
+	byte[] reverse_dataToSend = reverse(dataToSend);
+	String d1 = byteArrayToHexString(reverse_dataToSend);
+   	String targetHex = byteArrayToHexString(targetBuf);
+	String target = targetHex.substring(0,7+1);
+	sendBuf = hexStringToByteArray(d1+target);
+	dmsg("DATA TO FPGA " + byteArrayToHexString(sendBuf) + ":" + sendBuf.length );
 
 	long t = new Date().getTime();
 	synchronized (ztex) {
@@ -1749,10 +1614,10 @@ public static byte[] chunkEndianSwitch(byte[] data) {
 			if (i>=args.length) throw new Exception();
 			if ( args[i].length() < 1 ) throw new Exception();
 			mode = Character.toLowerCase( args[i].charAt(0) );
-			if ( mode != 's' && mode != 't'  && mode != 'p' && mode != 'c' ) throw new Exception();
+			if ( mode != 's' && mode != 'p' && mode != 'c' ) throw new Exception();
 		    } 
 		    catch (Exception e) {
-		        throw new ParameterException("s|t|p|c expected after -m");
+		        throw new ParameterException("s|p|c expected after -m");
 		    }
 		}
 		else if ( args[i].equals("-i") ) {
@@ -1771,7 +1636,7 @@ public static byte[] chunkEndianSwitch(byte[] data) {
 	    logFile = new PrintStream ( new FileOutputStream ( logFileName, true ), true );
     
    
-	    if ( mode != 't' && mode != 'p' ) {
+	    if (  mode != 'p' ) {
 		if ( rpcuser[0] == null ) {
 		    System.out.print("Enter RPC user name: ");
 		    rpcuser[0] = new BufferedReader(new InputStreamReader( System.in) ).readLine();
@@ -1783,7 +1648,7 @@ public static byte[] chunkEndianSwitch(byte[] data) {
 		}
 	    }
 		
-	    if ( mode == 's' || mode == 't' ) {
+	    if ( mode == 's' ) {
 		if ( devNum < 0 )
 		    devNum = 0;
 	
@@ -1798,37 +1663,7 @@ public static byte[] chunkEndianSwitch(byte[] data) {
 		}
 		
 	        LTCMiner miner = new LTCMiner ( bus.device(devNum), firmwareFile, verbose );
-		if ( mode == 't' ) { // single mode
-		//miner.initWork(hexStrToData("000000014eb4577c82473a069ca0e95703254da62e94d1902ab6f0eae8b1e718565775af20c9ba6ced48fc9915ef01c54da2200090801b2d2afc406264d491c7dfc7b0b251e91f141b44717e00310000ff070000"));
-		//here lets add the scrypt test data from here:
-		//
-		miner.initWork(hexStrToData("00001300e71744b141f19e152b0b7cfd7c194d462604cfa2d2b1080900022ad45c10fe5199cf84dec6ab9c02fa577565817e1b8eae0f6ba2091d49e26ad45230759e0ac960a37428c7754be410000000" )); //this data is already in little endian at nonce 0000318f
-
-		    miner.sendData (true); //true for testmode
-		    for (int i=0; i<Integer.MAX_VALUE; i++ ) {
-			try {
-			    Thread.sleep( 250 );
-			}
-			catch ( InterruptedException e) {
-			}	 
-			miner.getNoncesInt();
-
-    			for ( int j=0; j<miner.numNonces; j++ ) {
-	    		    System.out.println( i  + ":  miner nonce " + intToHexStr(miner.nonce[j]) + " golden nonce " + intToHexStr(miner.goldenNonce[j])) ;  
-	    		}
-		    } 
-		}
-		else { // single mode
-		    Vector<LTCMiner> v = new Vector<LTCMiner>();
-		    v.add ( miner );
-		    for ( int i=1; i<miner.numberOfFpgas(); i++ )
-			v.add(new LTCMiner(miner.ztex(), miner.fpgaNum(i), verbose) );
-		    System.out.println("");
-		    if ( miner.ztex().numberOfFpgas()>1 ) 
-			System.out.println("A multi-FPGA board is detected. Use the cluster mode for additional statistics.");
-		    System.out.println("Disconnect device or press Ctrl-C for exit\n");
-		    new PollLoop(v).run(); 
-		}
+		new PollLoop(miner).run(); 
 	    }
     
 	}
@@ -1840,5 +1675,4 @@ public static byte[] chunkEndianSwitch(byte[] data) {
 	System.exit(0);
 	
    } 
-
 }

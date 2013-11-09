@@ -19,14 +19,8 @@
 /* TODO: 
  * HUP signal
  * rollntime / expire oder strutm
- * backup pool: prioritaet veraendern, timeout einstellen
- *
- *
- * TODO: 
- * scrypt remove all dependencies from midstate
  */  
  
-
 
 import java.io.*;
 import java.util.*;
@@ -38,12 +32,6 @@ import java.util.zip.*;
 import ch.ntb.usb.*;
 
 import ztex.*;
-import javax.crypto.Mac;
-import javax.crypto.spec.SecretKeySpec;
-import java.security.GeneralSecurityException;
-
-import static java.lang.System.arraycopy;
-import static java.lang.Integer.rotateLeft;
 
 // *****************************************************************************
 // ******* ParameterException **************************************************
@@ -71,7 +59,7 @@ class ParameterException extends Exception {
 		"    -ep0              Always use slow EP0 for Bitstream transfer\n" +
 		"    -oh <number>      Overheat threshold: if the hash rate drops by that factor (but at least two frequency steps)\n"+
 		"                      the overheat shutdown is triggered (default: 0.04, recommended: 0 to 0.08)\n"+
-		"    -t <number>       Temperature limit (in C, default 70 C)\n" +
+		"    -t <number>       Temperature limit (in C, default 70C)\n" +
 		"    -ps <string>      Select devices with the given serial number,\n" +
 		"                      in cluster mode: select devices which serial number starts with the given string\n" +
 		"    -e <number>       Maximum error rate\n"+
@@ -149,7 +137,7 @@ class NewBlockMonitor extends Thread implements MsgObj {
 // ******* checkNew ************************************************************
     synchronized public boolean checkNew ( byte[] data ) throws NumberFormatException {
 	if ( data.length < 36 )
-	    throw new NumberFormatException("Invalid length of data " + data.length);
+	    throw new NumberFormatException("Invalid length of data");
 
 	boolean n = false;
 
@@ -603,7 +591,7 @@ class BTCMinerCluster {
     		}
     	    }
 	    catch ( Exception e ) {
-		BTCMiner.printMsg( "Error1: "+e.getLocalizedMessage() );
+		BTCMiner.printMsg( "Error: "+e.getLocalizedMessage() );
 	    }
 	}
 
@@ -1178,8 +1166,8 @@ class BTCMiner implements MsgObj  {
 
     private byte[] dataBuf = new byte[128];
     private byte[] dataBuf2 = new byte[128];
-    private byte[] midstateBuf = new byte[32]; //we dont need it
-    private byte[] sendBuf = new byte[84]; 
+    private byte[] midstateBuf = new byte[32];
+    private byte[] sendBuf = new byte[44];
     private byte[] hashBuf = hexStrToData("00000000000000000000000000000000000000000000000000000000000000000000008000000000000000000000000000000000000000000000000000010000");
     private byte[] targetBuf = hexStrToData("ffffffffffffffffffffffffffffffffffffffffffffffffffffffff00000000");
     private double difficulity = 1.0;
@@ -1216,7 +1204,6 @@ class BTCMiner implements MsgObj  {
     public double[] errorRate = new double[256];
     public double[] maxErrorRate = new double[256];
     public final double errorHysteresis = 0.1; // in frequency steps
-    
     
     private double maxHashRate = 0;
     
@@ -1464,7 +1451,7 @@ class BTCMiner implements MsgObj  {
         con.setRequestProperty("Content-Type", "application/json");
 	con.setRequestProperty("Cache-Control", "no-cache");
         con.setRequestProperty("User-Agent", "ztexBTCMiner");
-//        con.setRequestProperty("X-Mining-Extensions", "longpoll midstate submitold"); //remove midstate scrypt
+        con.setRequestProperty("X-Mining-Extensions", "longpoll midstate submitold");
         con.setRequestProperty("Content-Length", "" + request.length());
         con.setUseCaches(false);
         con.setDoInput(true);
@@ -1641,37 +1628,39 @@ class BTCMiner implements MsgObj  {
     }
 
 // ******* initWork **********************************************************
-    public void initWork (byte[] data) {
-	if ( data.length != 84 )
-	    throw new NumberFormatException("Invalid length of data " + data.length);
-	for (int i=0; i<84; i++)
+    public void initWork (byte[] data, byte[] midstate) {
+	if ( data.length != 128 )
+	    throw new NumberFormatException("Invalid length of data");
+	if ( midstate.length != 32 )
+	    throw new NumberFormatException("Invalid length of midstate");
+	for (int i=0; i<128; i++)
 	    dataBuf[i] = data[i];
+	for (int i=0; i<32; i++)
+	    midstateBuf[i] = midstate[i];
     }
+
 // ******* getHash ***********************************************************
     public int getHash(int n) throws NumberFormatException {
 	intToData(n, dataBuf, 76);
-	sha256_transform( sha256_init_state,0, dataBuf,64, hashBuf,0 );
+	sha256_transform( midstateBuf,0, dataBuf,64, hashBuf,0 );
+	sha256_transform( sha256_init_state,0, hashBuf,0, hashBuf,0 );
 	return dataToInt( hashBuf,28 );
     } 
 
 // ******* compareWithTarget ***************************************************
     // returns true if smaller than or equal to target
-    public boolean compareWithTarget(int nonce) throws NumberFormatException {
-  	  //intToData(nonce, dataBuf, 76);
-      try {
-    	  Hasher hasher = new Hasher();
-    	  byte[] hash = hasher.hash(dataBuf, nonce);
-    	  for (int i = hash.length - 1; i >= 0; i--) {
-    		if ((hash[i] & 0xff) > (targetBuf[i] & 0xff))
-    			return false;
-    		if ((hash[i] & 0xff) < (targetBuf[i] & 0xff))
-    			return true;
-    	  }
-    	  return true;    	  
-      }catch (GeneralSecurityException e) {
-			return false;
-	 }
-	 
+    public boolean compareWithTarget(int n) throws NumberFormatException {
+	intToData(n, dataBuf, 76);
+	sha256_transform( midstateBuf,0, dataBuf,64, hashBuf,0 );
+	sha256_transform( sha256_init_state,0, hashBuf,0, hashBuf,0 );
+	for ( int i=0; i<32; i++ ) {
+	    int j=i+3-2*(i%4);
+	    if ( (hashBuf[31-j] & 255) < (targetBuf[31-i] & 255) )
+		return true;
+	    if ( (hashBuf[31-j] & 255) > (targetBuf[31-i] & 255) )
+		return false;
+	}
+	return true;
     }
 
 // ******* getMidstate *********************************************************
@@ -1681,13 +1670,12 @@ class BTCMiner implements MsgObj  {
     }
 
 // ******* sendData ***********************************************************
-//  for litecoin send 80 bytes of the 128 byte data plus 4 bytes of 32 byte target
     public void sendData () throws UsbException {
-	for ( int i=0; i < 80; i++)
-	    sendBuf[i] = dataBuf[i]; 
-	for ( int i=0; i < 4; i++ ) 
-	    sendBuf[i+80] = targetBuf[i];
-    
+	for ( int i=0; i<12; i++ ) 
+	    sendBuf[i] = dataBuf[i+64];
+	for ( int i=0; i<32; i++ ) 
+	    sendBuf[i+12] = midstateBuf[i];
+	System.out.println("data to FPGA " + dataToHexStr(sendBuf));    
 	long t = new Date().getTime();
 	synchronized (ztex) {
 	    try {
@@ -1696,7 +1684,7 @@ class BTCMiner implements MsgObj  {
 	    catch ( InvalidFirmwareException e )  {
 		// shouldn't occur
 	    }
-    	    ztex.vendorCommand2( 0x80, "Send hash data", 0, 0, sendBuf, 84 );
+    	    ztex.vendorCommand2( 0x80, "Send hash data", 0, 0, sendBuf, 44 );
     	}
         usbTime += new Date().getTime() - t;
         
@@ -1872,9 +1860,10 @@ class BTCMiner implements MsgObj  {
 	    }
     	    ztex.vendorRequest2( 0x81, "Read hash data", 0, 0, buf, numNonces*bs );
     	}
+	System.out.println("rd: " + dataToHexStr(buf));
         usbTime += new Date().getTime() - t;
         
-	System.out.print("rd:" + dataToHexStr(buf)+":"+buf.length + "  ");
+//	System.out.print(dataToHexStr(buf)+"            ");
         for ( int i=0; i<numNonces; i++ ) {
 	    goldenNonce[i*(1+extraSolutions)] = dataToInt(buf,i*bs+0) - offsNonces;
 	    int j = dataToInt(buf,i*bs+4) - offsNonces;
@@ -1891,6 +1880,7 @@ class BTCMiner implements MsgObj  {
 // ******* checkNonce *******************************************************
     public boolean checkNonce( int n, int h ) throws UsbException {
 	int offs[] = { 0, 1, -1, 2, -2 };
+//	int offs[] = { 0 };
 	for (int i=0; i<offs.length; i++ ) {
 	    if ( getHash(n + offs[i]) == h + 0x5be0cd19 )
 		return true;
@@ -2340,10 +2330,9 @@ class BTCMiner implements MsgObj  {
 		
 	        BTCMiner miner = new BTCMiner ( bus.device(devNum), firmwareFile, verbose );
 		if ( mode == 't' ) { // single mode
-		//here lets add the scrypt test data from here:
-		//https://github.com/pooler/JMiner/blob/master/src/org/litecoinpool/miner/Work.java#L219
 		    miner.initWork( 
-			hexStrToData( "000000014eb4577c82473a069ca0e95703254da62e94d1902ab6f0eae8b1e718565775af20c9ba6ced48fc9915ef01c54da2200090801b2d2afc406264d491c7dfc7b0b251e91f141b44717e00310000ff070000" )
+			hexStrToData( "0000000122f3e795bb7a55b2b4a580e0dbba9f2a5aedbfc566632984000008de00000000e951667fbba0cfae7719ab2fb4ab8d291a20d387782f4610297f5899cc58b7d64e4056801a08e1e500000000000000800000000000000000000000000000000000000000000000000000000000000000000000000000000080020000" ),
+			hexStrToData( "28b81bd40a0e1b75d18362cb9a2faa61669d42913f26194f776c349e97559190" )
 		    );
 
 		    miner.sendData ( );
@@ -2356,9 +2345,7 @@ class BTCMiner implements MsgObj  {
 			miner.getNoncesInt();
 
     			for ( int j=0; j<miner.numNonces; j++ ) {
-	    		    System.out.println( i +"-" + j + ":  miner nonce " + intToHexStr(miner.nonce[j]) + "    " + miner.checkNonce(miner.nonce[j],miner.hash7[j])  + "   " +  
-					    miner.overflowCount + "    " + intToHexStr(miner.goldenNonce[j*(1+miner.extraSolutions)]) + "      "  + 
-					    intToHexStr( miner.getHash( miner.goldenNonce[j]) ) );
+	    		    System.out.println( i +"-" + j + ":  " + intToHexStr(miner.nonce[j]) + "    " + miner.checkNonce(miner.nonce[j],miner.hash7[j])  + "   " +  miner.overflowCount + "    " + intToHexStr(miner.goldenNonce[j*(1+miner.extraSolutions)]) + "      "  + intToHexStr( miner.getHash( miner.goldenNonce[j]) ) );
 	    		}
 		    } 
 		}
@@ -2435,7 +2422,7 @@ class BTCMiner implements MsgObj  {
 	    
 	}
 	catch (Exception e) {
-	    System.out.println("Error:2 "+e.getLocalizedMessage() );
+	    System.out.println("Error: "+e.getLocalizedMessage() );
 	} 
 
 	if ( BTCMiner.newBlockMonitor != null ) {
