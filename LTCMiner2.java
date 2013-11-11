@@ -443,14 +443,35 @@ class LTCMiner implements MsgObj  {
 	"ztex_ufm1_15y1.ihx" 
     };
    
-public static byte[] endianSwitch(byte[] bytes) {
+    public boolean meetsTarget(int nonce, Hasher hasher) throws GeneralSecurityException {
+      byte[] hash = hasher.hash(headerBuf, nonce);
+          for (int i = hash.length - 1; i >= 0; i--) {
+            if ((hash[i] & 0xff) > (targetBuf[i] & 0xff))
+                return false;
+            if ((hash[i] & 0xff) < (targetBuf[i] & 0xff))
+                return true;
+      }
+      return true;
+   }
+
+   private static byte[] headerByData(byte[] data) {
+                byte[] h = new byte[80];
+                for (int i = 0; i < 80; i += 4) {
+                        h[i] = data[i + 3];
+                        h[i + 1] = data[i + 2];
+                        h[i + 2] = data[i + 1];
+                        h[i + 3] = data[i];
+                }
+                return h;
+   }
+   public static byte[] endianSwitch(byte[] bytes) {
 	   //Method to switch the endianess of a byte array
 	   byte[] bytes2 = new byte[bytes.length];
 	   for(int i = 0; i < bytes.length;  i++){
 		   bytes2[i] = bytes[bytes.length-i-1];
 	   }
 	   return bytes2;
-}
+   }
 
    
 // ******* printMsg *************************************************************
@@ -537,16 +558,6 @@ public static byte[] endianSwitch(byte[] bytes) {
 		    sb.append(Integer.toString((b[i] & 0xff) + 0x100,16).substring(1));
 	    return sb.toString();
     }
-// ******* hexStrToData ********************************************************
-    public static byte[] hexStrToData( String str ) throws NumberFormatException {
-	if ( str.length() % 2 != 0 ) 
-	    throw new NumberFormatException("Invalid length of string");
-	byte[] buf = new byte[str.length() >> 1];
-	for ( int i=0; i<buf.length; i++) {
-	    buf[i] = (byte) Integer.parseInt( str.substring(i*2,i*2+2), 16);
-	}
-	return buf;
-    }
 
     public static byte[] hexStringToByteArray(String s)
     {
@@ -568,25 +579,6 @@ public static byte[] endianSwitch(byte[] bytes) {
 			    Character.digit(s.charAt(i+1),16));
         }
     }
-    public static void hexStrToData( String str, byte[] buf ) throws NumberFormatException {
-	if ( str.length()<buf.length*2 ) 
-	    throw new NumberFormatException("Invalid length of string");
-	for ( int i=0; i<buf.length; i++) {
-	    buf[i] = (byte) Integer.parseInt( str.substring(i*2,i*2+2), 16);
-	}
-    }
-
-// ******* dataToHexStr ********************************************************
-    public static String dataToHexStr (byte[] data)  {
-	final char hexchars[] = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f' };
-	char[] buf = new char[data.length*2];
-	for ( int i=0; i<data.length; i++) {
-	    buf[i*2+0] = hexchars[(data[i] & 255) >> 4];
-	    buf[i*2+1] = hexchars[(data[i] & 15)];
-	}
-	return new String(buf);
-    }
-
 // ******* dataToInt **********************************************************
     public static int dataToInt (byte[] buf, int offs)  {
 	if ( offs + 4 > buf.length )
@@ -622,7 +614,7 @@ public static byte[] endianSwitch(byte[] bytes) {
 
 // ******* intToHexStr ********************************************************
     public static String intToHexStr (int n)  {
-	return dataToHexStr( reverse( intToData ( n ) ) );
+	return byteArrayToHexString( reverse( intToData ( n ) ) );
     }
 
 // ******* reverse ************************************************************
@@ -712,7 +704,7 @@ public static byte[] endianSwitch(byte[] bytes) {
 	    try {
 	        byte buf[] = new byte[6];
 	        new Ztex1v1(dev).macRead(buf);
-	        System.out.println("   MAC address: " + dataToHexStr(buf)); 
+	        System.out.println("   MAC address: " + byteArrayToHexString(buf)); 
 	    }
 	    catch (Exception e) {
 	    }
@@ -747,6 +739,7 @@ public static byte[] endianSwitch(byte[] bytes) {
     private byte[] dataBuf = new byte[128];
     private byte[] dataBuf2 = new byte[128];
     private byte[] sendBuf = new byte[128]; 
+    private byte[] headerBuf;
     private byte[] hashBuf = hexStringToByteArray("00000000000000000000000000000000000000000000000000000000000000000000008000000000000000000000000000000000000000000000000000010000");
     private byte[] targetBuf = hexStringToByteArray("fffffffffffffffffffffffffffffffffffffffffffffffffffff0f0ff0f0000");
     
@@ -835,7 +828,7 @@ public static byte[] endianSwitch(byte[] bytes) {
 	try {
 	    byte buf[] = new byte[6];
 	    ztex.macRead(buf);
-	    msg("MAC address: " + dataToHexStr(buf)); 
+	    msg("MAC address: " + byteArrayToHexString(buf)); 
 	}
 	catch (Exception e) {
 	    msg("No mac address support"); 
@@ -1123,12 +1116,11 @@ public static byte[] endianSwitch(byte[] bytes) {
         }
 
 	newCount = newBlockMonitor.newCount;
-	
  	
 	try {
 	    hexStringToByteArray(jsonParse(response,"data"), dataBuf);
+	    headerBuf = headerByData(dataBuf);
 	    dmsg("fresh dataBuf " + byteArrayToHexString(dataBuf));
-	    //dataBuf=endianSwitch(dataBuf);
 	}
 	catch ( NumberFormatException e ) {
 	    throw new ParserException( e.getLocalizedMessage() );
@@ -1165,27 +1157,34 @@ public static byte[] endianSwitch(byte[] bytes) {
 	d[78] = (byte) (n >>  8);
 	d[77] = (byte) (n >> 16);
 	d[76] = (byte) (n >> 24);
-
-	msg( "Submitting new nonce " + intToHexStr(n) + ":" +  n );
-	dmsg( dateFormat.format( new Date() ) + ": " + name + ": submitted " + byteArrayToHexString(d) + " to " + rpcurl[rpcNum]);
-	String response = bitcoinRequest( "getwork", byteArrayToHexString(d));
-	msg("response: " + response);
-	String err = null;
+	//hack to make it work
 	try {
-	    err = jsonParse(response,"error");
-	}
-	catch ( ParserException e ) {
-	}
-	if ( err!=null && !err.equals("null") && !err.equals("") ) 
-	    msg( "Error attempting to submit new nonce: " + err );
+		Hasher hasher = new Hasher();
+		if(meetsTarget(n,hasher)){
+			msg( "Submitting new nonce " + intToHexStr(n) + ":" +  n );
+			dmsg( dateFormat.format( new Date() ) + ": " + name + ": submitted " + byteArrayToHexString(d) + " to " + rpcurl[rpcNum]);
+			String response = bitcoinRequest( "getwork", byteArrayToHexString(d));
+			msg("response: " + response);
+			String err = null;
+			try {
+			    err = jsonParse(response,"error");
+			}
+			catch ( ParserException e ) {
+			}
+			if ( err!=null && !err.equals("null") && !err.equals("") ) 
+			    msg( "Error attempting to submit new nonce: " + err );
 
-	for (int i=lastGoldenNonces.length-1; i>0; i-- )
-	    lastGoldenNonces[i]=lastGoldenNonces[i-1];
-	lastGoldenNonces[0] = n;
+			for (int i=lastGoldenNonces.length-1; i>0; i-- )
+			    lastGoldenNonces[i]=lastGoldenNonces[i-1];
+			lastGoldenNonces[0] = n;
 
-	t = new Date().getTime() - t;
-	submitTime = submitTime * 0.99 + t;
-	submitTimeW = submitTimeW * 0.99 + 1;
+			t = new Date().getTime() - t;
+			submitTime = submitTime * 0.99 + t;
+			submitTimeW = submitTimeW * 0.99 + 1;
+		}
+	} catch (GeneralSecurityException e) {
+        }
+	
     }
     public void sendData () throws UsbException {
 	    sendData(false);
@@ -1390,7 +1389,7 @@ public static byte[] endianSwitch(byte[] bytes) {
     	    ztex.vendorRequest2( 0x81, "Read hash data", 0, 0, buf, numNonces*bs ); //it should be  12 bytes 
     	}
         usbTime += new Date().getTime() - t;
-	//dmsg("read data from fpga:" + dataToHexStr(buf)+ "  ");
+	//dmsg("read data from fpga:" + byteArrayToHexString(buf)+ "  ");
         for ( int i=0; i<numNonces; i++ ) { //for 1.15b numNonces is always 1, so i is always 0
 	    goldenNonce[i*(1+extraSolutions)] = dataToInt(buf,i*bs+0) - offsNonces;
 	    int j = dataToInt(buf,i*bs+4) - offsNonces;
