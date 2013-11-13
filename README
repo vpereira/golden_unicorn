@@ -5,7 +5,9 @@ to build it you will need:
 read http://wiki.ztex.de/doku.php?id=en:software:porting#macos_port
 java sdk, sdcc, make, freepascal, etc
 
+remember:
 
+at the fpga directories, we have all bitstreams. TODAY just the 1.15b is supported by the LTC miner. the others are here just to remember us that they should be rewritten
 
 build order
 
@@ -17,3 +19,4 @@ root directory: make (I normally copy the result from libusbJava-src to the root
 
 
  
+you will have to load the bitstream located on fpga into your FPGA. you will use for it the FWLoader
