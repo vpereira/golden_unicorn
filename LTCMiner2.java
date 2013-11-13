@@ -1202,7 +1202,7 @@ class LTCMiner implements MsgObj  {
 	String d1 = byteArrayToHexString(reverse_dataToSend);
    	String targetHex = byteArrayToHexString(targetBuf);
 	String target = targetHex.substring(0,7+1);
-	sendBuf = hexStringToByteArray(d1+target);
+	sendBuf = hexStringToByteArray(target+d1);
 	dmsg("DATA TO FPGA " + byteArrayToHexString(sendBuf) + ":" + sendBuf.length );
 
 	long t = new Date().getTime();
